@@ -1,0 +1,70 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:paddingBottom="@dimen/activity_vertical_margin"
+	android:paddingLeft="@dimen/activity_horizontal_margin"
+	android:paddingRight="@dimen/activity_horizontal_margin"
+	android:paddingTop="@dimen/activity_vertical_margin"
+	tools:context=".MainActivity$PlaceholderFragment">
+
+	<com.tippingcanoe.quickreturn.library.QuickReturnContainer
+		android:id="@+id/quickReturn"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<TextView
+			android:id="@+id/fixedHeader"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="#ff7400dd"
+			android:padding="15dp"
+			android:text="Fixed"
+			android:textAppearance="?android:attr/textAppearanceLarge" />
+
+		<TextView
+			android:id="@+id/quickReturnHeader"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:background="@android:drawable/toast_frame"
+			android:padding="15dp"
+			android:text="QuickReturn"
+			android:textAppearance="?android:attr/textAppearanceLarge" />
+
+		<TextView
+			android:id="@+id/fixedFooter"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="#ff0a6fdd"
+			android:padding="15dp"
+			android:text="Fixed"
+			android:textAppearance="?android:attr/textAppearanceLarge" />
+
+		<TextView
+			android:id="@+id/quickReturnFooter"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:background="@android:drawable/toast_frame"
+			android:text="QuickReturn"
+			android:textAppearance="?android:attr/textAppearanceLarge" />
+
+		<TextView
+			android:id="@+id/quickReturnFooterTwo"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="#ffb4ff00"
+			android:padding="15dp"
+			android:text="QuickReturn"
+			android:textAppearance="?android:attr/textAppearanceLarge" />
+
+		<ListView
+			android:id="@+id/listView"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent" />
+
+	</com.tippingcanoe.quickreturn.library.QuickReturnContainer>
+
+
+</RelativeLayout>
