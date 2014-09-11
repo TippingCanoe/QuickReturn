@@ -2,7 +2,6 @@ package com.tippingcanoe.quickreturn.library;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -12,7 +11,6 @@ import com.daimajia.easing.Skill;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
-import com.nineoldandroids.view.ViewHelper;
 
 import java.util.ArrayList;
 
@@ -215,7 +213,6 @@ public class QuickReturnContainer extends RelativeLayout {
 			for (int i = 0; i < headerViews.size(); i++) {
 				if (headerViewsShouldQuickReturn.get(i)) {
 					View view = headerViews.get(i);
-					Log.v("Iain", "#" + ViewHelper.getTranslationX(view));
 					animators.add(Glider.glide(Skill.QuadEaseIn, ANIMATION_TIME_OUT, ObjectAnimator.ofFloat(view, "translationY", 0, -1 * (headerViewHeights.get(i)))));
 				}
 			}
@@ -246,7 +243,6 @@ public class QuickReturnContainer extends RelativeLayout {
 			for (int i = 0; i < headerViews.size(); i++) {
 				if (headerViewsShouldQuickReturn.get(i)) {
 					View view = headerViews.get(i);
-					Log.v("Iain", "@" + ViewHelper.getTranslationX(view));
 					animators.add(Glider.glide(Skill.BackEaseOut, ANIMATION_TIME_IN, ObjectAnimator.ofFloat(view, "translationY", -1 * (headerViewHeights.get(i)), 0)));
 				}
 			}
