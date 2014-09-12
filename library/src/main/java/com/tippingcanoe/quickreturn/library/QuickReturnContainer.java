@@ -15,12 +15,14 @@ import com.nineoldandroids.view.ViewHelper;
 import java.util.ArrayList;
 
 public class QuickReturnContainer extends RelativeLayout {
+	protected View offsetView;
 	protected View observedView;
 	protected AbsListView.OnScrollListener passThroughListViewOnScrollListener;
 	protected GenericOnScrollListener<ObservableScrollView> passThroughScrollViewOnScrollListener;
 
 	protected ArrayList<View> headerViews = new ArrayList<View>();
 	protected ArrayList<Boolean> headerViewsShouldQuickReturn = new ArrayList<Boolean>();
+	protected ArrayList<Boolean> headerViewsRenderOverList = new ArrayList<Boolean>();
 	protected ArrayList<Integer> headerViewHeights = new ArrayList<Integer>();
 
 	protected AnimationState animationState = AnimationState.SHOWN;
@@ -201,6 +203,16 @@ public class QuickReturnContainer extends RelativeLayout {
 	}
 
 	/**
+	 * Set a view included at the top of your observable area that can be used to offset the content.
+	 * An example would be a header view attached to an ListView.
+	 *
+	 * @param offsetView
+	 */
+	public void setOffsetView ( View offsetView ) {
+		this.offsetView = offsetView;
+	}
+
+	/**
 	 * Set the OnScrollListener for the attached AbsListView. Note that this library consumes the normal
 	 * OnScrollListener, so you need to use this passthrough.
 	 *
@@ -225,10 +237,12 @@ public class QuickReturnContainer extends RelativeLayout {
 	 *
 	 * @param view
 	 * @param shouldQuickReturn
+	 * @param rendersOverList
 	 */
-	public void attachHeaderView ( View view, boolean shouldQuickReturn ) {
+	public void attachHeaderView ( View view, boolean shouldQuickReturn, boolean rendersOverList ) {
 		headerViews.add(view);
 		headerViewsShouldQuickReturn.add(shouldQuickReturn);
+		headerViewsRenderOverList.add(rendersOverList);
 	}
 
 	/**
@@ -249,6 +263,28 @@ public class QuickReturnContainer extends RelativeLayout {
 		if (index >= 0 && index < headerViews.size()) {
 			headerViews.remove(index);
 			headerViewsShouldQuickReturn.remove(index);
+		}
+	}
+
+	/**
+	 * Sets whether the specified header view should render above the observed scrollable area.
+	 *
+	 * @param view
+	 * @param shouldRenderAboveList
+	 */
+	public void setHeaderViewShouldRenderAboveList ( View view, boolean shouldRenderAboveList ) {
+		setHeaderViewShouldRenderAboveList(headerViews.indexOf(view), shouldRenderAboveList);
+	}
+
+	/**
+	 * Sets whether the specified header view should render above the observed scrollable area.
+	 *
+	 * @param index
+	 * @param shouldRenderAboveList
+	 */
+	public void setHeaderViewShouldRenderAboveList ( int index, boolean shouldRenderAboveList ) {
+		if (index >= 0 && index < headerViews.size()) {
+			headerViewsRenderOverList.set(index, shouldRenderAboveList);
 		}
 	}
 
@@ -423,6 +459,7 @@ public class QuickReturnContainer extends RelativeLayout {
 		if (changed) {
 			recalculateHeaderHeights();
 			setupMargins();
+			showHiddenQuickReturns(false);
 		}
 
 		super.onLayout(changed, l, t, r, b);
@@ -440,13 +477,15 @@ public class QuickReturnContainer extends RelativeLayout {
 
 	protected void setupMargins () {
 		int runningHeaderHeightSum = 0;
-		for (int height : headerViewHeights) {
-			runningHeaderHeightSum += height;
+		for (int i = 0; i < headerViews.size(); i++) {
+			if (!headerViewsRenderOverList.get(i)) {
+				runningHeaderHeightSum += headerViewHeights.get(i);
+			}
 		}
 
-		LayoutParams layoutParams = (LayoutParams) observedView.getLayoutParams();
-		layoutParams.topMargin = runningHeaderHeightSum;
-		observedView.setLayoutParams(layoutParams);
+		if (offsetView != null) {
+			offsetView.setMinimumHeight(runningHeaderHeightSum);
+		}
 	}
 
 	protected void setHeaderAnimations ( int y, int oldY ) {
