@@ -97,6 +97,10 @@ public class MainActivity extends ActionBarActivity {
 			quickReturn.attachHeaderView(quickHeaderTwo, true, false);
 			quickReturn.attachHeaderView(quickHeader, true, true);
 
+			quickReturn.attachFooterView(fixedFooter, false, false);
+			quickReturn.attachFooterView(quickFooterTwo, true, false);
+			quickReturn.attachFooterView(quickFooter, true, true);
+
 			CheckBox onScrollCheck = (CheckBox) rootView.findViewById(R.id.onScrollCheckbox);
 			onScrollCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 				@Override
