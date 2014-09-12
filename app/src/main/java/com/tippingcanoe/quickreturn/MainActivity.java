@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
 				@Override
 				public void onItemClick ( AdapterView<?> adapterView, View view, int i, long l ) {
 					Toast.makeText(getActivity(), "Showing quick returns", Toast.LENGTH_SHORT).show();
-					quickReturn.revealHiddenQuickReturns(true);
+					quickReturn.showHiddenQuickReturns(true);
 				}
 			});
 
