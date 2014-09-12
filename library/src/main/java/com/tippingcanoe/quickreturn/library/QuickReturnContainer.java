@@ -3,7 +3,6 @@ package com.tippingcanoe.quickreturn.library;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.RelativeLayout;
 import com.daimajia.easing.Glider;
@@ -11,13 +10,11 @@ import com.daimajia.easing.Skill;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
+import com.nineoldandroids.view.ViewHelper;
 
 import java.util.ArrayList;
 
 public class QuickReturnContainer extends RelativeLayout {
-	protected final int ANIMATION_TIME_OUT = 200;
-	protected final int ANIMATION_TIME_IN = 300;
-
 	protected View observedView;
 	protected AbsListView.OnScrollListener passThroughListViewOnScrollListener;
 	protected GenericOnScrollListener<ObservableScrollView> passThroughScrollViewOnScrollListener;
@@ -26,7 +23,18 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected ArrayList<Boolean> headerViewsShouldQuickReturn = new ArrayList<Boolean>();
 	protected ArrayList<Integer> headerViewHeights = new ArrayList<Integer>();
 
-	protected AnimationState headerAnimationState = AnimationState.SHOWN;
+	protected AnimationState animationState = AnimationState.SHOWN;
+
+	protected int runningScrollTally = 0;
+
+	protected RevealListenerType revealListenerType = RevealListenerType.SCROLL;
+	protected boolean revealOnIdle = true;
+	protected boolean snapToMidpoint = true;
+	protected float parallaxEffect = 0.8f;
+	protected int animationTimeOut = 200;
+	protected int animationTimeIn = 300;
+	protected int minDifferenceBeforeHide = 20;
+	protected int minDifferenceBeforeShow = 10;
 
 	public QuickReturnContainer ( Context context ) {
 		super(context);
@@ -38,6 +46,48 @@ public class QuickReturnContainer extends RelativeLayout {
 
 	public QuickReturnContainer ( Context context, AttributeSet attrs, int defStyle ) {
 		super(context, attrs, defStyle);
+	}
+
+	/**
+	 * In a AbsListView observable, sets whether the quick returned views should reveal themselves when the list is
+	 * idle.
+	 *
+	 * @param revealOnIdle
+	 */
+	public void setRevealOnIdle ( boolean revealOnIdle ) {
+		this.revealOnIdle = revealOnIdle;
+	}
+
+	/**
+	 * Sets up whether the quick returned views should reveal themselves based on scrolling or animation.
+	 *
+	 * @param revealListenerType
+	 */
+	public void setRevealListenerType ( RevealListenerType revealListenerType ) {
+		this.revealListenerType = revealListenerType;
+	}
+
+	/**
+	 * Sets up whether the quick returned views should snap open/closed based on their midpoint.
+	 *
+	 * @param snapToMidpoint
+	 */
+	public void setSnapToMidpoint ( boolean snapToMidpoint ) {
+		this.snapToMidpoint = snapToMidpoint;
+	}
+
+	/**
+	 * Sets up how extreme quick returned views should scroll with a parallax effect compared to the observed list. A
+	 * value of 0.5f indicates the quick returned views should move at half the speed of the list. A value of 1.0f
+	 * indicates no parallax effect. A value of 1.5f indicates the quick returned views should move at 150% the speed of
+	 * the list.
+	 *
+	 * Note that this only applies to RevealListenerType.SCROLL.
+	 *
+	 * @param parallaxEffect
+	 */
+	public void setParallaxEffect ( float parallaxEffect ) {
+		this.parallaxEffect = parallaxEffect;
 	}
 
 	/**
@@ -58,10 +108,10 @@ public class QuickReturnContainer extends RelativeLayout {
 
 			@Override
 			public void onScrollChanged ( AbsListView view, int x, int y, int oldX, int oldY ) {
-				if (y > oldY) {
-					animateHeadersOut();
-				} else if (y < oldY) {
-					animateHeadersIn();
+				if (revealListenerType == RevealListenerType.SCROLL) {
+					setHeaderTranslations(y, oldY);
+				} else if (revealListenerType == RevealListenerType.ANIMATED ) {
+					setHeaderAnimations(y, oldY);
 				}
 			}
 
@@ -69,6 +119,10 @@ public class QuickReturnContainer extends RelativeLayout {
 			public void onScrollStateChanged ( AbsListView listView, int i ) {
 				if (passThroughListViewOnScrollListener != null) {
 					passThroughListViewOnScrollListener.onScrollStateChanged(listView, i);
+				}
+
+				if (i == SCROLL_STATE_IDLE && revealOnIdle ) {
+					revealHiddenQuickReturns(true);
 				}
 			}
 		});
@@ -143,7 +197,6 @@ public class QuickReturnContainer extends RelativeLayout {
 		if (index >= 0 && index < headerViews.size()) {
 			headerViews.remove(index);
 			headerViewsShouldQuickReturn.remove(index);
-			updateHeaderOffsets();
 		}
 	}
 
@@ -169,6 +222,89 @@ public class QuickReturnContainer extends RelativeLayout {
 		}
 	}
 
+	/**
+	 * Sets the time, in ms, that it should take for the quick returned views to animate out when using
+	 * RevealListenerType.ANIMATED.
+	 *
+	 * @param animationTimeOut
+	 */
+	public void setAnimationTimeOut ( int animationTimeOut ) {
+		this.animationTimeOut = animationTimeOut;
+	}
+
+	/**
+	 * Sets the time, in ms, that it should take for the quick returned views to animate in when using
+	 * RevealListenerType.ANIMATED.
+	 *
+	 * @param animationTimeIn
+	 */
+	public void setAnimationTimeIn ( int animationTimeIn ) {
+		this.animationTimeIn = animationTimeIn;
+	}
+
+	/**
+	 * Sets the minimum distance, in pixels, that the list needs to travel before the quick returned views are hidden.
+	 *
+	 * @param minDifferenceBeforeHide
+	 */
+	public void setMinDifferenceBeforeHide ( int minDifferenceBeforeHide ) {
+		this.minDifferenceBeforeHide = minDifferenceBeforeHide;
+	}
+
+	/**
+	 * Sets the minimum distance, in pixels, that the list needs to travel before the quick returned views are shown.
+	 *
+	 * @param minDifferenceBeforeShow
+	 */
+	public void setMinDifferenceBeforeShow ( int minDifferenceBeforeShow ) {
+		this.minDifferenceBeforeShow = minDifferenceBeforeShow;
+	}
+
+	/**
+	 * Shows any hidden quick returned views, optionally animating them back into place.
+	 *
+	 * @param animated
+	 */
+	public void revealHiddenQuickReturns ( boolean animated ) {
+		if (animationState != AnimationState.SHOWING) {
+			if (animated) {
+				ArrayList<Animator> animators = new ArrayList<Animator>();
+
+				for (int i = 0; i < headerViews.size(); i++) {
+					if (headerViewsShouldQuickReturn.get(i)) {
+						View view = headerViews.get(i);
+						int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+						if (currentTranslation < 0) {
+							animators.add(Glider.glide(Skill.QuintEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", 0)));
+						}
+					}
+				}
+
+				if (animators.size() > 0) {
+					animationState = AnimationState.SHOWING;
+					AnimatorSet headerAnimatiorSet = new AnimatorSet();
+
+					headerAnimatiorSet.playTogether(animators);
+					headerAnimatiorSet.setDuration(animationTimeIn);
+					headerAnimatiorSet.addListener(new AnimationSetTracker() {
+						@Override
+						public void onAllAnimationsEnded () {
+							animationState = AnimationState.SHOWN;
+						}
+					});
+					headerAnimatiorSet.start();
+				}
+			} else {
+				for (int i = 0; i < headerViews.size(); i++) {
+					if (headerViewsShouldQuickReturn.get(i)) {
+						ViewHelper.setTranslationY(headerViews.get(i), 0);
+					}
+				}
+			}
+		}
+	}
+
 	@Override
 	protected void onLayout ( boolean changed, int l, int t, int r, int b ) {
 		if (changed) {
@@ -181,39 +317,31 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected void recalculateHeaderHeights () {
 		headerViewHeights.clear();
 		for (View view : headerViews) {
+			int previousVisiblity = view.getVisibility();
+			view.setVisibility(VISIBLE);
 			headerViewHeights.add(view.getMeasuredHeight());
+			view.setVisibility(previousVisiblity);
 		}
-
-		updateHeaderOffsets();
 	}
 
-	protected void updateHeaderOffsets () {
-		int runningHeaderHeightSum = 0;
-
-		for (int i = 0; i < headerViews.size(); i++) {
-			View view = headerViews.get(i);
-			LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-			if (layoutParams == null) {
-				layoutParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-			}
-
-			layoutParams.addRule(ALIGN_PARENT_TOP, 1);
-
-			layoutParams.topMargin = runningHeaderHeightSum;
-			runningHeaderHeightSum += headerViewHeights.get(i);
-
-			view.setLayoutParams(layoutParams);
+	protected void setHeaderAnimations ( int y, int oldY ) {
+		if (y > oldY) {
+			animateHeadersOut();
+		} else if (y < oldY) {
+			animateHeadersIn();
 		}
 	}
 
 	protected void animateHeadersOut () {
-		if (headerViews.size() > 0 && headerAnimationState == AnimationState.SHOWN) {
+		if (headerViews.size() > 0 && animationState == AnimationState.SHOWN) {
 			ArrayList<Animator> animators = new ArrayList<Animator>();
+			int runningHeaderHeightSum = 0;
 
 			for (int i = 0; i < headerViews.size(); i++) {
 				if (headerViewsShouldQuickReturn.get(i)) {
 					View view = headerViews.get(i);
-					animators.add(Glider.glide(Skill.QuadEaseIn, ANIMATION_TIME_OUT, ObjectAnimator.ofFloat(view, "translationY", 0, -1 * (headerViewHeights.get(i)))));
+					runningHeaderHeightSum += headerViewHeights.get(i);
+					animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", 0, -1 * runningHeaderHeightSum)));
 				}
 			}
 
@@ -230,20 +358,22 @@ public class QuickReturnContainer extends RelativeLayout {
 					}
 				});
 
-				headerAnimatiorSet.setDuration(ANIMATION_TIME_OUT);
+				headerAnimatiorSet.setDuration(animationTimeOut);
 				headerAnimatiorSet.start();
 			}
 		}
 	}
 
 	protected void animateHeadersIn () {
-		if (headerViews.size() > 0 && headerAnimationState == AnimationState.HIDDEN) {
+		if (headerViews.size() > 0 && animationState == AnimationState.HIDDEN) {
 			ArrayList<Animator> animators = new ArrayList<Animator>();
+			int runningHeaderHeightSum = 0;
 
 			for (int i = 0; i < headerViews.size(); i++) {
 				if (headerViewsShouldQuickReturn.get(i)) {
 					View view = headerViews.get(i);
-					animators.add(Glider.glide(Skill.BackEaseOut, ANIMATION_TIME_IN, ObjectAnimator.ofFloat(view, "translationY", -1 * (headerViewHeights.get(i)), 0)));
+					runningHeaderHeightSum += headerViewHeights.get(i);
+					animators.add(Glider.glide(Skill.QuintEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", -1 * runningHeaderHeightSum, 0)));
 				}
 			}
 
@@ -260,21 +390,48 @@ public class QuickReturnContainer extends RelativeLayout {
 					}
 				});
 
-				headerAnimatiorSet.setDuration(ANIMATION_TIME_IN);
+				headerAnimatiorSet.setDuration(animationTimeIn);
 				headerAnimatiorSet.start();
 			}
 		}
 	}
 
 	protected void headerAnimationsStarted ( AnimationState fromDirection ) {
-		headerAnimationState = fromDirection;
+		animationState = fromDirection;
 	}
 
 	protected void headerAnimationsComplete ( AnimationState fromDirection ) {
 		if (fromDirection == AnimationState.SHOWING) {
-			headerAnimationState = AnimationState.SHOWN;
+			animationState = AnimationState.SHOWN;
 		} else {
-			headerAnimationState = AnimationState.HIDDEN;
+			animationState = AnimationState.HIDDEN;
+		}
+	}
+
+	protected void setHeaderTranslations ( int y, int oldY ) {
+		int runningHeaderHeightSum = 0;
+		float diff = oldY - y;
+		for (int i = 0; i < headerViews.size(); i++) {
+			if (headerViewsShouldQuickReturn.get(i)) {
+				View view = headerViews.get(i);
+				int height = headerViewHeights.get(i);
+				float currentTranslation = ViewHelper.getTranslationY(view);
+
+				if (runningHeaderHeightSum > 0) {
+
+					diff *= 1.0f + ((float) height / (float) runningHeaderHeightSum);
+				}
+
+				runningHeaderHeightSum += height;
+
+				setQuickReturnTranslation(view, currentTranslation, diff, -1 * runningHeaderHeightSum, 0);
+			}
+		}
+	}
+
+	protected void setQuickReturnTranslation ( View view, float currentTranslation, float diff, int min, int max ) {
+		if (animationState != AnimationState.SHOWING ) {
+			ViewHelper.setTranslationY(view, Math.min(Math.max(min, currentTranslation + (diff * parallaxEffect)), max));
 		}
 	}
 }
