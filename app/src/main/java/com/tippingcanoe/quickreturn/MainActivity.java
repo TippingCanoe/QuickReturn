@@ -68,7 +68,7 @@ public class MainActivity extends ActionBarActivity {
 			listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 				@Override
 				public void onItemClick ( AdapterView<?> adapterView, View view, int i, long l ) {
-					Toast.makeText(getActivity(), "Hiding quick returns", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), "Showing quick returns", Toast.LENGTH_SHORT).show();
 					quickReturn.revealHiddenQuickReturns(true);
 				}
 			});

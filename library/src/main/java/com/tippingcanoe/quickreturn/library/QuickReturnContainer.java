@@ -33,8 +33,8 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected float parallaxEffect = 0.8f;
 	protected int animationTimeOut = 200;
 	protected int animationTimeIn = 300;
-	protected int minDifferenceBeforeHide = 20;
-	protected int minDifferenceBeforeShow = 10;
+	protected int minDifferenceBeforeHide = 200;
+	protected int minDifferenceBeforeShow = 100;
 
 	public QuickReturnContainer ( Context context ) {
 		super(context);
@@ -108,10 +108,12 @@ public class QuickReturnContainer extends RelativeLayout {
 
 			@Override
 			public void onScrollChanged ( AbsListView view, int x, int y, int oldX, int oldY ) {
-				if (revealListenerType == RevealListenerType.SCROLL) {
-					setHeaderTranslations(y, oldY);
-				} else if (revealListenerType == RevealListenerType.ANIMATED ) {
-					setHeaderAnimations(y, oldY);
+				if (scrollTallySignificantEnough(y, oldY)) {
+					if (revealListenerType == RevealListenerType.SCROLL) {
+						setHeaderTranslations(y, oldY);
+					} else if (revealListenerType == RevealListenerType.ANIMATED) {
+						setHeaderAnimations(y, oldY);
+					}
 				}
 			}
 
@@ -267,6 +269,8 @@ public class QuickReturnContainer extends RelativeLayout {
 	 */
 	public void revealHiddenQuickReturns ( boolean animated ) {
 		if (animationState != AnimationState.SHOWING) {
+			runningScrollTally = 0;
+
 			if (animated) {
 				ArrayList<Animator> animators = new ArrayList<Animator>();
 
@@ -433,5 +437,41 @@ public class QuickReturnContainer extends RelativeLayout {
 		if (animationState != AnimationState.SHOWING ) {
 			ViewHelper.setTranslationY(view, Math.min(Math.max(min, currentTranslation + (diff * parallaxEffect)), max));
 		}
+	}
+
+	protected boolean scrollTallySignificantEnough ( int y, int oldY ) {
+		int diff = oldY - y;
+
+		if (diff > 0) {
+			// Scrolled up.
+			if (runningScrollTally < 0) {
+				runningScrollTally = 0;
+			}
+
+			runningScrollTally += diff;
+
+			if (runningScrollTally >= minDifferenceBeforeShow) {
+				runningScrollTally = 0;
+
+				return true;
+			}
+		} else if (diff < 0) {
+			// Scrolled down.
+			if (runningScrollTally > 0) {
+				runningScrollTally = 0;
+			}
+
+			runningScrollTally += diff;
+
+			if (Math.abs(runningScrollTally) >= minDifferenceBeforeHide) {
+				runningScrollTally = 0;
+
+				return true;
+			}
+		} else {
+			runningScrollTally = 0;
+		}
+
+		return false;
 	}
 }
