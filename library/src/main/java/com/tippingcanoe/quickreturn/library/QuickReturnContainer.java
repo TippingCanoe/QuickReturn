@@ -139,17 +139,7 @@ public class QuickReturnContainer extends RelativeLayout {
 
 			@Override
 			public void onScrollChanged ( AbsListView view, int x, int y, int oldX, int oldY ) {
-				if (scrollTallySignificantEnough(y, oldY)) {
-					if (revealOnIdle && idleRunnable != null) {
-						removeCallbacks(idleRunnable);
-					}
-
-					if (revealListenerType == RevealListenerType.SCROLL) {
-						setQuickReturnViewTranslations(y, oldY);
-					} else if (revealListenerType == RevealListenerType.ANIMATED) {
-						setQuickReturnViewAnimations(y, oldY);
-					}
-				}
+				handleScrollChanged(y, oldY);
 			}
 
 			@Override
@@ -158,26 +148,7 @@ public class QuickReturnContainer extends RelativeLayout {
 					passThroughListViewOnScrollListener.onScrollStateChanged(listView, i);
 				}
 
-				if (i == SCROLL_STATE_IDLE) {
-					if (snapToMidpoint && revealListenerType == RevealListenerType.SCROLL) {
-						snapQuickReturnsToMidpoint(true);
-					}
-
-					if (revealOnIdle) {
-						if (idleRunnable != null) {
-							removeCallbacks(idleRunnable);
-						}
-
-						idleRunnable = new Runnable() {
-							@Override
-							public void run () {
-								showHiddenQuickReturns(true);
-							}
-						};
-
-						postDelayed(idleRunnable, idleRevealDelay);
-					}
-				}
+				handleScrollStateChanged(i);
 			}
 		});
 
@@ -196,11 +167,17 @@ public class QuickReturnContainer extends RelativeLayout {
 				if (passThroughScrollViewOnScrollListener != null) {
 					passThroughScrollViewOnScrollListener.onScrollChanged(view, x, y, oldX, oldY);
 				}
+
+				handleScrollChanged(y, oldY);
 			}
 
 			@Override
 			public void onScrollStateChanged ( ObservableScrollView view, int i ) {
+				if (passThroughScrollViewOnScrollListener != null) {
+					passThroughScrollViewOnScrollListener.onScrollStateChanged(view, i);
+				}
 
+				handleScrollStateChanged(i);
 			}
 		});
 
@@ -744,6 +721,43 @@ public class QuickReturnContainer extends RelativeLayout {
 				}
 
 				break;
+			}
+		}
+	}
+
+	protected void handleScrollStateChanged ( int i ) {
+		if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+			if (snapToMidpoint && revealListenerType == RevealListenerType.SCROLL) {
+				snapQuickReturnsToMidpoint(true);
+			}
+
+			if (revealOnIdle) {
+				if (idleRunnable != null) {
+					removeCallbacks(idleRunnable);
+				}
+
+				idleRunnable = new Runnable() {
+					@Override
+					public void run () {
+						showHiddenQuickReturns(true);
+					}
+				};
+
+				postDelayed(idleRunnable, idleRevealDelay);
+			}
+		}
+	}
+
+	protected void handleScrollChanged ( int y, int oldY ) {
+		if (scrollTallySignificantEnough(y, oldY)) {
+			if (revealOnIdle && idleRunnable != null) {
+				removeCallbacks(idleRunnable);
+			}
+
+			if (revealListenerType == RevealListenerType.SCROLL) {
+				setQuickReturnViewTranslations(y, oldY);
+			} else if (revealListenerType == RevealListenerType.ANIMATED) {
+				setQuickReturnViewAnimations(y, oldY);
 			}
 		}
 	}

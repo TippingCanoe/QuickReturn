@@ -32,3 +32,24 @@ dependencies {
 	// http://nineoldandroids.com/
 	compile 'com.nineoldandroids:library:2.4.0'
 }
+
+
+apply plugin: 'maven'
+
+group = 'com.tippingcanoe'
+version = '0.0.1-SNAPSHOT'
+project.ext.description = "Quick returning headers and footers."
+
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			pom.project {
+				name project.getName()
+				description project.ext.description
+			}
+			repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+			repository url: 'file://' + new File("./maven").absolutePath
+		}
+	}
+}
