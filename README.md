@@ -3,7 +3,7 @@
 ## Introduction
 
 This library is based on the QuickReturn UI pattern [described by Roman Nurik](https://plus.google.com/u/0/+RomanNurik/posts/1Sb549FvpJt).
-It adds the ability for **AbsListView**s and **ScrollView**s to have multiple attached headers and footers that will
+It adds the ability for `AbsListView`s and `ScrollView`s to have multiple attached headers and footers that will
 disappear and reappear as the user scrolls through the associated content.
 
 A demo application included with this repository shows an example of this functionality;
