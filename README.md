@@ -53,7 +53,7 @@ and footers as children.
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
         
-</com.tippingcanoe.quickreturn.library.QuickReturnContainer
+</com.tippingcanoe.quickreturn.library.QuickReturnContainer>
 ```
 
 **Hint:** `QuickReturnContainer` extends `RelativeLayout`, so you may find it easier to design and layout your headers
