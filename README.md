@@ -27,7 +27,7 @@ A demo application included with this repository shows an example of this functi
 
 	``` groovy
 	dependencies {
-		compile 'com.tippingcanoe.quickreturn:library:0.0.1-SNAPSHOT'
+		compile 'com.tippingcanoe.quickreturn:library:0.0.1-SNAPSHOT@aar'
 	}
 	```
 
