@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+	<groupId>com.tippingcanoe.quickreturn</groupId>
+	<artifactId>library</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<versioning>
+		<versions>
+			<version>0.0.1-SNAPSHOT</version>
+		</versions>
+		<lastUpdated>20140913042311</lastUpdated>
+	</versioning>
+</metadata>
