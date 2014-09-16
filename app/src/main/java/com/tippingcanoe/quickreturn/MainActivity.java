@@ -46,6 +46,7 @@ public class MainActivity extends ActionBarActivity {
 	public static class PlaceholderFragment extends Fragment {
 
 		QuickReturnContainer quickReturn;
+		private boolean twoHeadersHidden = false;
 
 		public PlaceholderFragment () {
 		}
@@ -58,9 +59,9 @@ public class MainActivity extends ActionBarActivity {
 			TextView fixedFooter = (TextView) rootView.findViewById(R.id.fixedFooter);
 
 			TextView quickHeader = (TextView) rootView.findViewById(R.id.quickReturnHeader);
-			TextView quickHeaderTwo = (TextView) rootView.findViewById(R.id.quickReturnHeaderTwo);
+			final TextView quickHeaderTwo = (TextView) rootView.findViewById(R.id.quickReturnHeaderTwo);
 			final TextView quickFooter = (TextView) rootView.findViewById(R.id.quickReturnFooter);
-			TextView quickFooterTwo = (TextView) rootView.findViewById(R.id.quickReturnFooterTwo);
+			final TextView quickFooterTwo = (TextView) rootView.findViewById(R.id.quickReturnFooterTwo);
 
 			FrameLayout offsetView = new FrameLayout(getActivity());
 
@@ -71,8 +72,14 @@ public class MainActivity extends ActionBarActivity {
 			listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 				@Override
 				public void onItemClick ( AdapterView<?> adapterView, View view, int i, long l ) {
-					Toast.makeText(getActivity(), "Showing quick returns", Toast.LENGTH_SHORT).show();
-					quickReturn.showHiddenQuickReturns(true);
+					Toast.makeText(getActivity(), "Toggling header two", Toast.LENGTH_SHORT).show();
+					if (twoHeadersHidden) {
+						quickReturn.showPermanentlyHiddenQuickReturnFooter(quickFooterTwo, true);
+					} else {
+						quickReturn.permanentlyHideQuickReturnFooter(quickFooterTwo, true);
+					}
+
+					twoHeadersHidden = !twoHeadersHidden;
 				}
 			});
 
@@ -93,13 +100,13 @@ public class MainActivity extends ActionBarActivity {
 				}
 			});
 
-			quickReturn.attachHeaderView(fixedHeader, false, false);
-			quickReturn.attachHeaderView(quickHeaderTwo, true, false);
-			quickReturn.attachHeaderView(quickHeader, true, true);
+			quickReturn.attachHeaderView(fixedHeader, false, false, false);
+			quickReturn.attachHeaderView(quickHeaderTwo, true, false, false);
+			quickReturn.attachHeaderView(quickHeader, true, true, false);
 
-			quickReturn.attachFooterView(fixedFooter, false, false);
-			quickReturn.attachFooterView(quickFooterTwo, true, false);
-			quickReturn.attachFooterView(quickFooter, true, true);
+			quickReturn.attachFooterView(fixedFooter, false, false, false);
+			quickReturn.attachFooterView(quickFooterTwo, true, false, false);
+			quickReturn.attachFooterView(quickFooter, true, true, false);
 
 			CheckBox onScrollCheck = (CheckBox) rootView.findViewById(R.id.onScrollCheckbox);
 			onScrollCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

@@ -24,11 +24,13 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected ArrayList<Boolean> headerViewsShouldQuickReturn = new ArrayList<Boolean>();
 	protected ArrayList<Boolean> headerViewsRenderOverList = new ArrayList<Boolean>();
 	protected ArrayList<Integer> headerViewHeights = new ArrayList<Integer>();
+	protected ArrayList<Boolean> headerViewsPermanentlyHidden = new ArrayList<Boolean>();
 
 	protected ArrayList<View> footerViews = new ArrayList<View>();
 	protected ArrayList<Boolean> footerViewsShouldQuickReturn = new ArrayList<Boolean>();
 	protected ArrayList<Boolean> footerViewsRenderOverList = new ArrayList<Boolean>();
 	protected ArrayList<Integer> footerViewHeights = new ArrayList<Integer>();
+	protected ArrayList<Boolean> footerViewsPermanentlyHidden = new ArrayList<Boolean>();
 
 	protected AnimationState animationState = AnimationState.SHOWN;
 
@@ -220,11 +222,13 @@ public class QuickReturnContainer extends RelativeLayout {
 	 * @param view
 	 * @param shouldQuickReturn
 	 * @param rendersOverList
+	 * @param perminentlyHidden
 	 */
-	public void attachHeaderView ( View view, boolean shouldQuickReturn, boolean rendersOverList ) {
+	public void attachHeaderView ( View view, boolean shouldQuickReturn, boolean rendersOverList, boolean perminentlyHidden ) {
 		headerViews.add(view);
 		headerViewsShouldQuickReturn.add(shouldQuickReturn);
 		headerViewsRenderOverList.add(rendersOverList);
+		headerViewsPermanentlyHidden.add(perminentlyHidden);
 	}
 
 	/**
@@ -245,6 +249,10 @@ public class QuickReturnContainer extends RelativeLayout {
 		if (index >= 0 && index < headerViews.size()) {
 			headerViews.remove(index);
 			headerViewsShouldQuickReturn.remove(index);
+			headerViewsRenderOverList.remove(index);
+			headerViewsPermanentlyHidden.remove(index);
+
+			setupView();
 		}
 	}
 
@@ -267,6 +275,8 @@ public class QuickReturnContainer extends RelativeLayout {
 	public void setHeaderViewShouldRenderAboveList ( int index, boolean shouldRenderAboveList ) {
 		if (index >= 0 && index < headerViews.size()) {
 			headerViewsRenderOverList.set(index, shouldRenderAboveList);
+
+			setupView();
 		}
 	}
 
@@ -289,6 +299,8 @@ public class QuickReturnContainer extends RelativeLayout {
 	public void setHeaderViewShouldQuickReturn ( int index, boolean shouldQuickReturn ) {
 		if (index >= 0 && index < headerViews.size()) {
 			headerViewsShouldQuickReturn.set(index, shouldQuickReturn);
+
+			setupView();
 		}
 	}
 
@@ -298,11 +310,13 @@ public class QuickReturnContainer extends RelativeLayout {
 	 * @param view
 	 * @param shouldQuickReturn
 	 * @param rendersOverList
+	 * @param perminentlyHidden
 	 */
-	public void attachFooterView ( View view, boolean shouldQuickReturn, boolean rendersOverList ) {
+	public void attachFooterView ( View view, boolean shouldQuickReturn, boolean rendersOverList, boolean perminentlyHidden ) {
 		footerViews.add(view);
 		footerViewsShouldQuickReturn.add(shouldQuickReturn);
 		footerViewsRenderOverList.add(rendersOverList);
+		footerViewsPermanentlyHidden.add(perminentlyHidden);
 	}
 
 	/**
@@ -323,6 +337,10 @@ public class QuickReturnContainer extends RelativeLayout {
 		if (index >= 0 && index < footerViews.size()) {
 			footerViews.remove(index);
 			footerViewsShouldQuickReturn.remove(index);
+			footerViewsRenderOverList.remove(index);
+			footerViewsPermanentlyHidden.remove(index);
+
+			setupView();
 		}
 	}
 
@@ -345,6 +363,8 @@ public class QuickReturnContainer extends RelativeLayout {
 	public void setFooterViewShouldRenderAboveList ( int index, boolean shouldRenderAboveList ) {
 		if (index >= 0 && index < footerViews.size()) {
 			footerViewsRenderOverList.set(index, shouldRenderAboveList);
+
+			setupView();
 		}
 	}
 
@@ -367,6 +387,8 @@ public class QuickReturnContainer extends RelativeLayout {
 	public void setFooterViewShouldQuickReturn ( int index, boolean shouldQuickReturn ) {
 		if (index >= 0 && index < footerViews.size()) {
 			footerViewsShouldQuickReturn.set(index, shouldQuickReturn);
+
+			setupView();
 		}
 	}
 
@@ -428,25 +450,23 @@ public class QuickReturnContainer extends RelativeLayout {
 			if (animated) {
 				ArrayList<Animator> animators = new ArrayList<Animator>();
 
+				int runningPermanentlyHiddenHeaderHeightSum = 0;
 				for (int i = 0; i < headerViews.size(); i++) {
-					if (headerViewsShouldQuickReturn.get(i)) {
+					if (headerViewsPermanentlyHidden.get(i)) {
+						runningPermanentlyHiddenHeaderHeightSum += headerViewHeights.get(i);
+					} else if (headerViewsShouldQuickReturn.get(i)) {
 						View view = headerViews.get(i);
-						int currentTranslation = (int) ViewHelper.getTranslationY(view);
-
-						if (currentTranslation < 0) {
-							animators.add(Glider.glide(Skill.QuintEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", 0)));
-						}
+						animators.add(Glider.glide(Skill.QuintEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", -1 * runningPermanentlyHiddenHeaderHeightSum)));
 					}
 				}
 
+				int runningPermanentlyHiddenFooterHeightSum = 0;
 				for (int i = 0; i < footerViews.size(); i++) {
-					if (footerViewsShouldQuickReturn.get(i)) {
+					if (footerViewsPermanentlyHidden.get(i)) {
+						runningPermanentlyHiddenFooterHeightSum += footerViewHeights.get(i);
+					} else if (footerViewsShouldQuickReturn.get(i)) {
 						View view = footerViews.get(i);
-						int currentTranslation = (int) ViewHelper.getTranslationY(view);
-
-						if (currentTranslation > 0) {
-							animators.add(Glider.glide(Skill.QuintEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", 0)));
-						}
+						animators.add(Glider.glide(Skill.QuintEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", runningPermanentlyHiddenFooterHeightSum)));
 					}
 				}
 
@@ -466,15 +486,21 @@ public class QuickReturnContainer extends RelativeLayout {
 					animatorSet.start();
 				}
 			} else {
+				int runningPermanentlyHiddenHeaderHeightSum = 0;
 				for (int i = 0; i < headerViews.size(); i++) {
-					if (headerViewsShouldQuickReturn.get(i)) {
-						ViewHelper.setTranslationY(headerViews.get(i), 0);
+					if (headerViewsPermanentlyHidden.get(i)) {
+						runningPermanentlyHiddenHeaderHeightSum += headerViewHeights.get(i);
+					} else if (headerViewsShouldQuickReturn.get(i)) {
+						ViewHelper.setTranslationY(headerViews.get(i), -1 * runningPermanentlyHiddenHeaderHeightSum);
 					}
 				}
 
+				int runningPermanentlyHiddenFooterHeightSum = 0;
 				for (int i = 0; i < footerViews.size(); i++) {
-					if (footerViewsShouldQuickReturn.get(i)) {
-						ViewHelper.setTranslationY(footerViews.get(i), 0);
+					if (footerViewsPermanentlyHidden.get(i)) {
+						runningPermanentlyHiddenFooterHeightSum += footerViewHeights.get(i);
+					} else if (footerViewsShouldQuickReturn.get(i)) {
+						ViewHelper.setTranslationY(footerViews.get(i), runningPermanentlyHiddenFooterHeightSum);
 					}
 				}
 			}
@@ -497,11 +523,7 @@ public class QuickReturnContainer extends RelativeLayout {
 					if (headerViewsShouldQuickReturn.get(i)) {
 						View view = headerViews.get(i);
 						runningHeaderHeightSum += headerViewHeights.get(i);
-						int currentTranslation = (int) ViewHelper.getTranslationY(view);
-
-						if (currentTranslation > -1 * runningHeaderHeightSum) {
-							animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", -1 * runningHeaderHeightSum)));
-						}
+						animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", -1 * runningHeaderHeightSum)));
 					}
 				}
 
@@ -509,11 +531,7 @@ public class QuickReturnContainer extends RelativeLayout {
 					if (footerViewsShouldQuickReturn.get(i)) {
 						View view = footerViews.get(i);
 						runningFooterHeightSum += footerViewHeights.get(i);
-						int currentTranslation = (int) ViewHelper.getTranslationY(view);
-
-						if (currentTranslation < runningFooterHeightSum) {
-							animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", runningFooterHeightSum)));
-						}
+						animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", runningFooterHeightSum)));
 					}
 				}
 
@@ -552,15 +570,307 @@ public class QuickReturnContainer extends RelativeLayout {
 		}
 	}
 
+	/**
+	 * Mark a header view as permanently hidden. These views will not render until the manual show is called.
+	 *
+	 * @param view
+	 * @param animated
+	 */
+	public void permanentlyHideQuickReturnHeader ( View view, boolean animated ) {
+		permanentlyHideQuickReturnHeader(headerViews.indexOf(view), animated);
+	}
+
+	/**
+	 * Mark a header view as permanently hidden. These views will not render until the manual show is called.
+	 *
+	 * @param index
+	 * @param animated
+	 */
+	public void permanentlyHideQuickReturnHeader ( int index, boolean animated ) {
+		if (index >= 0 && index < headerViews.size() && !headerViewsPermanentlyHidden.get(index)) {
+			headerViewsPermanentlyHidden.set(index, true);
+
+			if (animationState == AnimationState.SHOWN || animationState == AnimationState.HIDDEN) {
+				if (animated) {
+					ArrayList<Animator> animators = new ArrayList<Animator>();
+					int runningHeaderHeightSum = 0;
+
+					for (int i = 0; i < headerViews.size(); i++) {
+						if (headerViewsShouldQuickReturn.get(i) && (index == i || !headerViewsPermanentlyHidden.get(i))) {
+							View view = headerViews.get(i);
+							runningHeaderHeightSum += headerViewHeights.get(i);
+							int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+							if (i == index) {
+								animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", -1 * runningHeaderHeightSum)));
+							} else if (i > index) {
+								animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", currentTranslation - headerViewHeights.get(index))));
+							}
+						}
+					}
+
+					if (animators.size() > 0) {
+						animationState = AnimationState.HIDING;
+
+						AnimatorSet animatorSet = new AnimatorSet();
+						animatorSet.playTogether(animators);
+						animatorSet.setDuration(animationTimeOut);
+						animatorSet.addListener(new AnimationSetTracker() {
+							@Override
+							public void onAllAnimationsEnded () {
+								animationsComplete(AnimationState.HIDING);
+							}
+						});
+
+						animatorSet.start();
+					}
+				} else {
+					int runningHeaderHeightSum = 0;
+					for (int i = 0; i < headerViews.size(); i++) {
+						if (headerViewsShouldQuickReturn.get(i) && (index == i || !headerViewsPermanentlyHidden.get(i))) {
+							View view = headerViews.get(i);
+							runningHeaderHeightSum += headerViewHeights.get(i);
+							int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+							if (i == index) {
+								ViewHelper.setTranslationY(headerViews.get(i), -1 * runningHeaderHeightSum);
+							} else if (i > index) {
+								ViewHelper.setTranslationY(headerViews.get(i), currentTranslation - headerViewHeights.get(index));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Remove a permanently hidden quick return header, allowing it to be shown again.
+	 *
+	 * @param view
+	 * @param animated
+	 */
+	public void showPermanentlyHiddenQuickReturnHeader ( View view, boolean animated ) {
+		showPermanentlyHiddenQuickReturnHeader(headerViews.indexOf(view), animated);
+	}
+
+	/**
+	 * Remove a permanently hidden quick return header, allowing it to be shown again.
+	 *
+	 * @param index
+	 * @param animated
+	 */
+	public void showPermanentlyHiddenQuickReturnHeader ( int index, boolean animated ) {
+		if (index >= 0 && index < headerViews.size() && headerViewsPermanentlyHidden.get(index)) {
+			headerViewsPermanentlyHidden.set(index, false);
+
+			if (animationState == AnimationState.SHOWN || animationState == AnimationState.HIDDEN) {
+				if (animated) {
+					ArrayList<Animator> animators = new ArrayList<Animator>();
+
+					for (int i = 0; i < headerViews.size(); i++) {
+						if (headerViewsShouldQuickReturn.get(i) && (index == i || !headerViewsPermanentlyHidden.get(i))) {
+							View view = headerViews.get(i);
+							int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+							if (i == index) {
+								animators.add(Glider.glide(Skill.QuadEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", 0)));
+							} else if (i > index) {
+								animators.add(Glider.glide(Skill.QuadEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", currentTranslation + headerViewHeights.get(index))));
+							}
+						}
+					}
+
+					if (animators.size() > 0) {
+						animationState = AnimationState.SHOWING;
+
+						AnimatorSet animatorSet = new AnimatorSet();
+						animatorSet.playTogether(animators);
+						animatorSet.setDuration(animationTimeIn);
+						animatorSet.addListener(new AnimationSetTracker() {
+							@Override
+							public void onAllAnimationsEnded () {
+								animationsComplete(AnimationState.SHOWING);
+							}
+						});
+
+						animatorSet.start();
+					}
+				} else {
+					for (int i = 0; i < headerViews.size(); i++) {
+						if (headerViewsShouldQuickReturn.get(i) && (index == i || !headerViewsPermanentlyHidden.get(i))) {
+							View view = headerViews.get(i);
+							int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+							if (i == index) {
+								ViewHelper.setTranslationY(headerViews.get(i), 0);
+							} else if (i > index) {
+								ViewHelper.setTranslationY(headerViews.get(i), currentTranslation + headerViewHeights.get(index));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Mark a footer view as permanently hidden. These views will not render until the manual show is called.
+	 *
+	 * @param view
+	 * @param animated
+	 */
+	public void permanentlyHideQuickReturnFooter ( View view, boolean animated ) {
+		permanentlyHideQuickReturnFooter(footerViews.indexOf(view), animated);
+	}
+
+	/**
+	 * Mark a footer view as permanently hidden. These views will not render until the manual show is called.
+	 *
+	 * @param index
+	 * @param animated
+	 */
+	public void permanentlyHideQuickReturnFooter ( int index, boolean animated ) {
+		if (index >= 0 && index < footerViews.size() && !footerViewsPermanentlyHidden.get(index)) {
+			footerViewsPermanentlyHidden.set(index, true);
+
+			if (animationState == AnimationState.SHOWN || animationState == AnimationState.HIDDEN) {
+				if (animated) {
+					ArrayList<Animator> animators = new ArrayList<Animator>();
+					int runningFooterHeightSum = 0;
+
+					for (int i = 0; i < footerViews.size(); i++) {
+						if (footerViewsShouldQuickReturn.get(i) && (index == i || !footerViewsPermanentlyHidden.get(i))) {
+							View view = footerViews.get(i);
+							runningFooterHeightSum += footerViewHeights.get(i);
+							int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+							if (i == index) {
+								animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", runningFooterHeightSum)));
+							} else if (i > index) {
+								animators.add(Glider.glide(Skill.QuadEaseIn, animationTimeOut, ObjectAnimator.ofFloat(view, "translationY", currentTranslation + footerViewHeights.get(index))));
+							}
+						}
+					}
+
+					if (animators.size() > 0) {
+						animationState = AnimationState.HIDING;
+
+						AnimatorSet animatorSet = new AnimatorSet();
+						animatorSet.playTogether(animators);
+						animatorSet.setDuration(animationTimeOut);
+						animatorSet.addListener(new AnimationSetTracker() {
+							@Override
+							public void onAllAnimationsEnded () {
+								animationsComplete(AnimationState.HIDING);
+							}
+						});
+
+						animatorSet.start();
+					}
+				} else {
+					int runningFooterHeightSum = 0;
+					for (int i = 0; i < footerViews.size(); i++) {
+						if (footerViewsShouldQuickReturn.get(i) && (index == i || !footerViewsPermanentlyHidden.get(i))) {
+							View view = footerViews.get(i);
+							runningFooterHeightSum += footerViewHeights.get(i);
+							int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+							if (i == index) {
+								ViewHelper.setTranslationY(footerViews.get(i), runningFooterHeightSum);
+							} else if (i > index) {
+								ViewHelper.setTranslationY(footerViews.get(i), currentTranslation + footerViewHeights.get(index));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Remove a permanently hidden quick return footer, allowing it to be shown again.
+	 *
+	 * @param view
+	 * @param animated
+	 */
+	public void showPermanentlyHiddenQuickReturnFooter ( View view, boolean animated ) {
+		showPermanentlyHiddenQuickReturnFooter(footerViews.indexOf(view), animated);
+	}
+
+	/**
+	 * Remove a permanently hidden quick return footer, allowing it to be shown again.
+	 *
+	 * @param index
+	 * @param animated
+	 */
+	public void showPermanentlyHiddenQuickReturnFooter ( int index, boolean animated ) {
+		if (index >= 0 && index < footerViews.size() && footerViewsPermanentlyHidden.get(index)) {
+			footerViewsPermanentlyHidden.set(index, false);
+
+			if (animationState == AnimationState.SHOWN || animationState == AnimationState.HIDDEN) {
+				if (animated) {
+					ArrayList<Animator> animators = new ArrayList<Animator>();
+
+					for (int i = 0; i < footerViews.size(); i++) {
+						if (footerViewsShouldQuickReturn.get(i) && (index == i || !footerViewsPermanentlyHidden.get(i))) {
+							View view = footerViews.get(i);
+							int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+							if (i == index) {
+								animators.add(Glider.glide(Skill.QuadEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", 0)));
+							} else if (i > index) {
+								animators.add(Glider.glide(Skill.QuadEaseOut, animationTimeIn, ObjectAnimator.ofFloat(view, "translationY", currentTranslation - footerViewHeights.get(index))));
+							}
+						}
+					}
+
+					if (animators.size() > 0) {
+						animationState = AnimationState.SHOWING;
+
+						AnimatorSet animatorSet = new AnimatorSet();
+						animatorSet.playTogether(animators);
+						animatorSet.setDuration(animationTimeIn);
+						animatorSet.addListener(new AnimationSetTracker() {
+							@Override
+							public void onAllAnimationsEnded () {
+								animationsComplete(AnimationState.SHOWING);
+							}
+						});
+
+						animatorSet.start();
+					}
+				} else {
+					for (int i = 0; i < footerViews.size(); i++) {
+						if (footerViewsShouldQuickReturn.get(i) && (index == i || !footerViewsPermanentlyHidden.get(i))) {
+							View view = footerViews.get(i);
+							int currentTranslation = (int) ViewHelper.getTranslationY(view);
+
+							if (i == index) {
+								ViewHelper.setTranslationY(footerViews.get(i), 0);
+							} else if (i > index) {
+								ViewHelper.setTranslationY(footerViews.get(i), currentTranslation - footerViewHeights.get(index));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	@Override
 	protected void onLayout ( boolean changed, int l, int t, int r, int b ) {
 		if (changed) {
-			recalculateQuickReturnViewHeights();
-			setupMargins();
-			showHiddenQuickReturns(false);
+			setupView();
 		}
 
 		super.onLayout(changed, l, t, r, b);
+	}
+
+	protected void setupView() {
+		recalculateQuickReturnViewHeights();
+		setupMargins();
+		showHiddenQuickReturns(false);
 	}
 
 	protected void recalculateQuickReturnViewHeights () {
@@ -584,7 +894,7 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected void setupMargins () {
 		int runningHeaderHeightSum = 0;
 		for (int i = 0; i < headerViews.size(); i++) {
-			if (!headerViewsRenderOverList.get(i)) {
+			if (!headerViewsRenderOverList.get(i) && !headerViewsPermanentlyHidden.get(i)) {
 				runningHeaderHeightSum += headerViewHeights.get(i);
 			}
 		}
@@ -612,29 +922,37 @@ public class QuickReturnContainer extends RelativeLayout {
 
 	protected void setQuickReturnViewTranslations ( int y, int oldY ) {
 		if (animationState == AnimationState.HIDDEN || animationState == AnimationState.SHOWN) {
-			float diff = oldY - y;
 
 			int runningHeaderHeightSum = 0;
+			int runningPermanentlyHiddenHeaderHeightSum = 0;
+			float diff = oldY - y;
 			for (int i = 0; i < headerViews.size(); i++) {
-				if (headerViewsShouldQuickReturn.get(i)) {
+				if (headerViewsPermanentlyHidden.get(i)) {
+					runningPermanentlyHiddenHeaderHeightSum += headerViewHeights.get(i);
+					runningHeaderHeightSum += headerViewHeights.get(i);
+				} else if (headerViewsShouldQuickReturn.get(i)) {
 					View view = headerViews.get(i);
 					int height = headerViewHeights.get(i);
 					float currentTranslation = ViewHelper.getTranslationY(view);
+
+					runningHeaderHeightSum += height;
 
 					if (runningHeaderHeightSum > 0) {
 						diff *= 1.0f + ((float) height / (float) runningHeaderHeightSum);
 					}
 
-					runningHeaderHeightSum += height;
-
-					setQuickReturnTranslation(view, currentTranslation, diff, -1 * runningHeaderHeightSum, 0);
+					setQuickReturnTranslation(view, currentTranslation, diff, -1 * runningHeaderHeightSum, -1 * runningPermanentlyHiddenHeaderHeightSum);
 				}
 			}
 
 			int runningFooterHeightSum = 0;
+			int runningPermanentlyHiddenFooterHeightSum = 0;
 			diff = y - oldY;
 			for (int i = 0; i < footerViews.size(); i++) {
-				if (footerViewsShouldQuickReturn.get(i)) {
+				if (footerViewsPermanentlyHidden.get(i)) {
+					runningPermanentlyHiddenFooterHeightSum += footerViewHeights.get(i);
+					runningFooterHeightSum += footerViewHeights.get(i);
+				} else if (footerViewsShouldQuickReturn.get(i)) {
 					View view = footerViews.get(i);
 					int height = footerViewHeights.get(i);
 					float currentTranslation = ViewHelper.getTranslationY(view);
@@ -645,7 +963,7 @@ public class QuickReturnContainer extends RelativeLayout {
 
 					runningFooterHeightSum += height;
 
-					setQuickReturnTranslation(view, currentTranslation, diff, 0, runningFooterHeightSum);
+					setQuickReturnTranslation(view, currentTranslation, diff, runningPermanentlyHiddenFooterHeightSum, runningFooterHeightSum);
 				}
 			}
 		}
@@ -690,37 +1008,43 @@ public class QuickReturnContainer extends RelativeLayout {
 	}
 
 	protected void snapQuickReturnsToMidpoint ( boolean animated ) {
+		int runningPermanentlyHiddenHeaderHeightSum = 0;
 		for (int i = 0; i < headerViews.size(); i++) {
-			if (headerViewsShouldQuickReturn.get(i)) {
+			if (headerViewsPermanentlyHidden.get(i)) {
+				runningPermanentlyHiddenHeaderHeightSum += headerViewHeights.get(i);
+			} else if (headerViewsShouldQuickReturn.get(i)) {
 				float height = headerViewHeights.get(i);
 				float offset = Math.abs(ViewHelper.getTranslationY(headerViews.get(i)));
 
-				if (offset > 0) {
-					if ((height * 0.75f) > offset) {
+				if (offset != runningPermanentlyHiddenHeaderHeightSum) {
+					if ((height * 0.75f) > (offset - runningPermanentlyHiddenHeaderHeightSum)) {
 						showHiddenQuickReturns(animated);
 					} else {
 						hideShownQuickReturns(animated);
 					}
-				}
 
-				break;
+					return;
+				}
 			}
 		}
 
+		int runningPermanentlyHiddenFooterHeightSum = 0;
 		for (int i = 0; i < footerViews.size(); i++) {
-			if (footerViewsShouldQuickReturn.get(i)) {
+			if (footerViewsPermanentlyHidden.get(i)) {
+				runningPermanentlyHiddenFooterHeightSum += footerViewHeights.get(i);
+			} else if (footerViewsShouldQuickReturn.get(i)) {
 				float height = footerViewHeights.get(i);
 				float offset = Math.abs(ViewHelper.getTranslationY(footerViews.get(i)));
 
-				if (offset > 0) {
-					if ((height * 0.75f) > offset) {
+				if (offset != runningPermanentlyHiddenFooterHeightSum) {
+					if ((height * 0.75f) > (offset - runningPermanentlyHiddenFooterHeightSum)) {
 						showHiddenQuickReturns(animated);
 					} else {
 						hideShownQuickReturns(animated);
 					}
-				}
 
-				break;
+					return;
+				}
 			}
 		}
 	}

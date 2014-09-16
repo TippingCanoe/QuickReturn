@@ -27,7 +27,6 @@ dependencies {
 	// https://github.com/daimajia/AnimationEasingFunctions
 	compile 'com.daimajia.easing:library:1.0.0@aar'
 
-
 	// Animation backport.
 	// http://nineoldandroids.com/
 	compile 'com.nineoldandroids:library:2.4.0'
@@ -37,7 +36,7 @@ dependencies {
 apply plugin: 'maven'
 
 group = 'com.tippingcanoe.quickreturn'
-version = '1.0.0'
+version = '1.0.1'
 project.ext.description = "Quick returning headers and footers."
 
 

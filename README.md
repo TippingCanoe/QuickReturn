@@ -27,7 +27,7 @@ A demo application included with this repository shows an example of this functi
 
 	``` groovy
 	dependencies {
-		compile 'com.tippingcanoe.quickreturn:library:1.0.0@aar'
+		compile 'com.tippingcanoe.quickreturn:library:1.0.1'
 	}
 	```
 
@@ -113,7 +113,7 @@ quickReturn.setOnScrollListener(new GenericOnScrollListener<ObservableScrollView
 Now all that's left to do is add the header and footer views you wish to have managed by the `QuickReturnContainer`;
 
 ``` java
-quickReturn.attachHeaderView(quickHeader, true, false);
+quickReturn.attachHeaderView(quickHeader, true, false, false);
 ```
 
 It's important to call `.attachHeaderView` for each view in the top down order - starting with the header closest to the
