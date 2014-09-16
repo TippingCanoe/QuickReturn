@@ -46,7 +46,7 @@ public class MainActivity extends ActionBarActivity {
 	public static class PlaceholderFragment extends Fragment {
 
 		QuickReturnContainer quickReturn;
-		private boolean twoHeadersHidden = false;
+		private boolean twoHeadersHidden = true;
 
 		public PlaceholderFragment () {
 		}
@@ -74,9 +74,9 @@ public class MainActivity extends ActionBarActivity {
 				public void onItemClick ( AdapterView<?> adapterView, View view, int i, long l ) {
 					Toast.makeText(getActivity(), "Toggling header two", Toast.LENGTH_SHORT).show();
 					if (twoHeadersHidden) {
-						quickReturn.showPermanentlyHiddenQuickReturnFooter(quickFooterTwo, true);
+						quickReturn.showPermanentlyHiddenQuickReturnHeader(quickHeaderTwo, true);
 					} else {
-						quickReturn.permanentlyHideQuickReturnFooter(quickFooterTwo, true);
+						quickReturn.permanentlyHideQuickReturnHeader(quickHeaderTwo, true);
 					}
 
 					twoHeadersHidden = !twoHeadersHidden;
@@ -101,11 +101,11 @@ public class MainActivity extends ActionBarActivity {
 			});
 
 			quickReturn.attachHeaderView(fixedHeader, false, false, false);
-			quickReturn.attachHeaderView(quickHeaderTwo, true, false, false);
+			quickReturn.attachHeaderView(quickHeaderTwo, false, false, true);
 			quickReturn.attachHeaderView(quickHeader, true, true, false);
 
 			quickReturn.attachFooterView(fixedFooter, false, false, false);
-			quickReturn.attachFooterView(quickFooterTwo, true, false, false);
+			quickReturn.attachFooterView(quickFooterTwo, true, true, false);
 			quickReturn.attachFooterView(quickFooter, true, true, false);
 
 			CheckBox onScrollCheck = (CheckBox) rootView.findViewById(R.id.onScrollCheckbox);

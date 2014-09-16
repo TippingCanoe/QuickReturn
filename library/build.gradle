@@ -36,7 +36,7 @@ dependencies {
 apply plugin: 'maven'
 
 group = 'com.tippingcanoe.quickreturn'
-version = '1.0.1'
+version = '1.0.2'
 project.ext.description = "Quick returning headers and footers."
 
 
