@@ -34,12 +34,14 @@ public class QuickReturnContainer extends RelativeLayout {
 
 	protected AnimationState animationState = AnimationState.SHOWN;
 
+	protected boolean lastActionWasScrollDown = true;
 	protected int runningScrollTally = 0;
 	protected Runnable idleRunnable;
 
 	protected RevealListenerType revealListenerType = RevealListenerType.SCROLL;
 	protected boolean revealOnIdle = false;
-	protected boolean snapToMidpoint = true;
+	protected boolean snapToIntent = true;
+	protected boolean snapToMidpoint = false;
 	protected float parallaxEffect = 0.8f;
 	protected int animationTimeOut = 200;
 	protected int animationTimeIn = 300;
@@ -83,9 +85,25 @@ public class QuickReturnContainer extends RelativeLayout {
 	}
 
 	/**
-	 * Sets up whether the quick returned views should snap open/closed based on their midpoint.
+	 * Sets up whether the quick returned views should snap/open closed based on the drag direction.
 	 *
 	 * Default is true.
+	 *
+	 * Overrides snapToMidpoint.
+	 *
+	 *
+	 * @param snapToIntent
+	 */
+	public void setSnapToIntent ( boolean snapToIntent ) {
+		this.snapToIntent = snapToIntent;
+	}
+
+	/**
+	 * Sets up whether the quick returned views should snap open/closed based on their midpoint.
+	 *
+	 * Default is false.
+	 *
+	 * Is overridden by snapToIntent.
 	 *
 	 * @param snapToMidpoint
 	 */
@@ -1036,6 +1054,14 @@ public class QuickReturnContainer extends RelativeLayout {
 		return false;
 	}
 
+	protected void snapQuickReturnsToIntent ( boolean animated ) {
+		if (lastActionWasScrollDown) {
+			hideShownQuickReturns(animated);
+		} else {
+			showHiddenQuickReturns(animated);
+		}
+	}
+
 	protected void snapQuickReturnsToMidpoint ( boolean animated ) {
 		int runningPermanentlyHiddenHeaderHeightSum = 0;
 		for (int i = 0; i < headerViews.size(); i++) {
@@ -1080,8 +1106,12 @@ public class QuickReturnContainer extends RelativeLayout {
 
 	protected void handleScrollStateChanged ( int i ) {
 		if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
-			if (snapToMidpoint && revealListenerType == RevealListenerType.SCROLL) {
-				snapQuickReturnsToMidpoint(true);
+			if (revealListenerType == RevealListenerType.SCROLL) {
+				if (snapToIntent) {
+					snapQuickReturnsToIntent(true);
+				} else if (snapToMidpoint) {
+					snapQuickReturnsToMidpoint(true);
+				}
 			}
 
 			if (revealOnIdle) {
@@ -1106,6 +1136,8 @@ public class QuickReturnContainer extends RelativeLayout {
 			if (revealOnIdle && idleRunnable != null) {
 				removeCallbacks(idleRunnable);
 			}
+
+			lastActionWasScrollDown = y >= oldY;
 
 			if (revealListenerType == RevealListenerType.SCROLL) {
 				setQuickReturnViewTranslations(y, oldY);
