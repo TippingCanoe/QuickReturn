@@ -129,7 +129,23 @@ public class QuickReturnContainer extends RelativeLayout {
 	 * @param listView
 	 */
 	public void setObservedView ( AbsListView listView ) {
-		listView.setOnScrollListener(new AbsOnScrollListenerWrapper() {
+		setObservedView(listView, new ScrollYProvider() {
+			@Override
+			public int getScrollY ( AbsListView listView ) {
+				return Helpers.getScrollY(listView);
+			}
+		});
+	}
+
+	/**
+	 * Sets the observed scrollable view to a AbsListView implementation. Allows injection of a custom Y offset
+	 * provider.
+	 *
+	 * @param listView
+	 * @param scrollYProvider
+	 */
+	public void setObservedView ( AbsListView listView, ScrollYProvider scrollYProvider ) {
+		listView.setOnScrollListener(new AbsOnScrollListenerWrapper(scrollYProvider) {
 			@Override
 			public void onScroll ( AbsListView absListView, int i, int i2, int i3 ) {
 				super.onScroll(absListView, i, i2, i3);

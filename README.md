@@ -22,12 +22,12 @@ A demo application included with this repository shows an example of this functi
     	}
 	}
 	```
-	
+
 2. And add the dependency;
 
 	``` groovy
 	dependencies {
-		compile 'com.tippingcanoe.quickreturn:library:1.0.1'
+		compile 'com.tippingcanoe.quickreturn:library:1.0.3'
 	}
 	```
 
@@ -47,12 +47,12 @@ and footers as children.
 		android:id="@+id/listView"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent" />
-		
+
 	<TextView
         android:id="@+id/quickReturnHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-        
+
 </com.tippingcanoe.quickreturn.library.QuickReturnContainer>
 ```
 
