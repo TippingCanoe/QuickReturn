@@ -17,6 +17,7 @@ import java.util.ArrayList;
 public class QuickReturnContainer extends RelativeLayout {
 	protected View offsetView;
 	protected View observedView;
+	protected OnMarginRecalculatedListener onMarginRecalculatedListener;
 	protected AbsListView.OnScrollListener passThroughListViewOnScrollListener;
 	protected GenericOnScrollListener<ObservableScrollView> passThroughScrollViewOnScrollListener;
 
@@ -948,6 +949,9 @@ public class QuickReturnContainer extends RelativeLayout {
 
 		if (offsetView != null) {
 			offsetView.setMinimumHeight(runningHeaderHeightSum);
+			if (onMarginRecalculatedListener != null) {
+				onMarginRecalculatedListener.onMarginRecalculated(runningHeaderHeightSum);
+			}
 		}
 	}
 
@@ -1145,5 +1149,9 @@ public class QuickReturnContainer extends RelativeLayout {
 				setQuickReturnViewAnimations(y, oldY);
 			}
 		}
+	}
+
+	public void setOnMarginRecalculatedListener ( OnMarginRecalculatedListener onMarginRecalculatedListener ) {
+		this.onMarginRecalculatedListener = onMarginRecalculatedListener;
 	}
 }

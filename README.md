@@ -27,7 +27,7 @@ A demo application included with this repository shows an example of this functi
 
 	``` groovy
 	dependencies {
-		compile 'com.tippingcanoe.quickreturn:library:1.0.4'
+		compile 'com.tippingcanoe.quickreturn:library:1.0.5'
 	}
 	```
 
