@@ -1,6 +1,7 @@
 package com.tippingcanoe.quickreturn.library;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AbsListView;
@@ -18,6 +19,7 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected View offsetView;
 	protected View observedView;
 	protected OnMarginRecalculatedListener onMarginRecalculatedListener;
+	protected RecyclerView.OnScrollListener passThroughRecyclerViewOnScrollListener;
 	protected AbsListView.OnScrollListener passThroughListViewOnScrollListener;
 	protected GenericOnScrollListener<ObservableScrollView> passThroughScrollViewOnScrollListener;
 
@@ -142,6 +144,35 @@ public class QuickReturnContainer extends RelativeLayout {
 		this.idleRevealDelay = idleRevealDelay;
 	}
 
+	public void setObservedView ( RecyclerView recyclerView ) {
+		recyclerView.setOnScrollListener(new RecyclerViewOnScrollListenerWrapper() {
+			@Override
+			public void onScrolled ( RecyclerView recyclerView, int dx, int dy ) {
+				super.onScrolled(recyclerView, dx, dy);
+
+				if (passThroughRecyclerViewOnScrollListener != null) {
+					passThroughRecyclerViewOnScrollListener.onScrolled(recyclerView, dx, dy);
+				}
+			}
+
+			@Override
+			public void onScrollStateChanged ( RecyclerView recyclerView, int newState ) {
+				super.onScrollStateChanged(recyclerView, newState);
+
+				if (passThroughRecyclerViewOnScrollListener != null) {
+					passThroughRecyclerViewOnScrollListener.onScrollStateChanged(recyclerView, newState);
+				}
+
+				handleScrollStateChanged(newState);
+			}
+
+			@Override
+			public void onScrollChanged ( RecyclerView view, int x, int y, int oldX, int oldY ) {
+				handleScrollChanged(y, oldY);
+			}
+		});
+	}
+
 	/**
 	 * Sets the observed scrollable view to a AbsListView implementation.
 	 *
@@ -175,11 +206,6 @@ public class QuickReturnContainer extends RelativeLayout {
 			}
 
 			@Override
-			public void onScrollChanged ( AbsListView view, int x, int y, int oldX, int oldY ) {
-				handleScrollChanged(y, oldY);
-			}
-
-			@Override
 			public void onScrollStateChanged ( AbsListView listView, int i ) {
 				if (passThroughListViewOnScrollListener != null) {
 					passThroughListViewOnScrollListener.onScrollStateChanged(listView, i);
@@ -187,6 +213,13 @@ public class QuickReturnContainer extends RelativeLayout {
 
 				handleScrollStateChanged(i);
 			}
+
+			@Override
+			public void onScrollChanged ( AbsListView view, int x, int y, int oldX, int oldY ) {
+				handleScrollChanged(y, oldY);
+			}
+
+
 		});
 
 		observedView = listView;
@@ -229,6 +262,16 @@ public class QuickReturnContainer extends RelativeLayout {
 	 */
 	public void setOffsetView ( View offsetView ) {
 		this.offsetView = offsetView;
+	}
+
+	/**
+	 * Set the OnScrollListener for the attached RecyclerView. Note that this library consumes the normal
+	 * OnScrollListener, so you need to use this passthrough.
+	 *
+	 * @param onScrollListener
+	 */
+	public void setOnScrollListener ( RecyclerView.OnScrollListener onScrollListener ) {
+		this.passThroughRecyclerViewOnScrollListener = onScrollListener;
 	}
 
 	/**
