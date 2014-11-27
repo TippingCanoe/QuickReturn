@@ -3,12 +3,18 @@ package com.tippingcanoe.quickreturn;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.*;
-import android.widget.*;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import com.tippingcanoe.quickreturn.library.QuickReturnContainer;
 import com.tippingcanoe.quickreturn.library.RevealListenerType;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -40,6 +46,19 @@ public class MainActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	public static class ViewHolder extends RecyclerView.ViewHolder {
+		TextView label;
+
+		public ViewHolder ( View itemView ) {
+			super(itemView);
+			label = (TextView) itemView.findViewById(android.R.id.text1);
+		}
+
+		public TextView getLabel () {
+			return label;
+		}
+	}
+
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
@@ -65,21 +84,28 @@ public class MainActivity extends ActionBarActivity {
 
 			FrameLayout offsetView = new FrameLayout(getActivity());
 
-			ListView listView = (ListView) rootView.findViewById(R.id.listView);
+			RecyclerView listView = (RecyclerView) rootView.findViewById(R.id.listView);
+			listView.setLayoutManager(new LinearLayoutManager(getActivity()));
+			listView.setHasFixedSize(true);
 
-			listView.addHeaderView(offsetView);
-			listView.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, Arrays.asList("lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "curabitur", "vel", "hendrerit", "libero", "eleifend", "blandit", "nunc", "ornare", "odio", "ut", "orci", "gravida", "imperdiet", "nullam", "purus", "lacinia", "a", "pretium", "quis", "congue", "praesent", "sagittis", "laoreet", "auctor", "mauris", "non", "velit", "eros", "dictum", "proin", "accumsan", "sapien", "nec", "massa", "volutpat", "venenatis", "sed", "eu", "molestie", "lacus", "quisque", "porttitor", "ligula", "dui", "mollis", "tempus", "at", "magna", "vestibulum", "turpis", "ac", "diam", "tincidunt", "id", "condimentum", "enim", "sodales", "in", "hac", "habitasse", "platea", "dictumst", "aenean", "neque", "fusce", "augue", "leo", "eget", "semper", "mattis", "tortor", "scelerisque", "nulla", "interdum", "tellus", "malesuada", "rhoncus", "porta", "sem", "aliquet", "et", "nam", "suspendisse", "potenti", "vivamus", "luctus", "fringilla", "erat", "donec", "justo", "vehicula", "ultricies", "varius", "ante", "primis", "faucibus", "ultrices", "posuere", "cubilia", "curae", "etiam", "cursus", "aliquam", "quam", "dapibus", "nisl", "feugiat", "egestas", "class", "aptent", "taciti", "sociosqu", "ad", "litora", "torquent", "per", "conubia", "nostra", "inceptos", "himenaeos", "phasellus", "nibh", "pulvinar", "vitae", "urna", "iaculis", "lobortis", "nisi", "viverra", "arcu", "morbi", "pellentesque", "metus", "commodo", "ut", "facilisis", "felis", "tristique", "ullamcorper", "placerat", "aenean", "convallis", "sollicitudin", "integer", "rutrum", "duis", "est", "etiam", "bibendum", "donec", "pharetra", "vulputate", "maecenas", "mi", "fermentum", "consequat", "suscipit", "aliquam", "habitant", "senectus", "netus", "fames", "quisque", "euismod", "curabitur", "lectus", "elementum", "tempor", "risus", "cras")));
-			listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			//listView.addHeaderView(offsetView);
+
+			final List<String> strings = Arrays.asList("lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "curabitur", "vel", "hendrerit", "libero", "eleifend", "blandit", "nunc", "ornare", "odio", "ut", "orci", "gravida", "imperdiet", "nullam", "purus", "lacinia", "a", "pretium", "quis", "congue", "praesent", "sagittis", "laoreet", "auctor", "mauris", "non", "velit", "eros", "dictum", "proin", "accumsan", "sapien", "nec", "massa", "volutpat", "venenatis", "sed", "eu", "molestie", "lacus", "quisque", "porttitor", "ligula", "dui", "mollis", "tempus", "at", "magna", "vestibulum", "turpis", "ac", "diam", "tincidunt", "id", "condimentum", "enim", "sodales", "in", "hac", "habitasse", "platea", "dictumst", "aenean", "neque", "fusce", "augue", "leo", "eget", "semper", "mattis", "tortor", "scelerisque", "nulla", "interdum", "tellus", "malesuada", "rhoncus", "porta", "sem", "aliquet", "et", "nam", "suspendisse", "potenti", "vivamus", "luctus", "fringilla", "erat", "donec", "justo", "vehicula", "ultricies", "varius", "ante", "primis", "faucibus", "ultrices", "posuere", "cubilia", "curae", "etiam", "cursus", "aliquam", "quam", "dapibus", "nisl", "feugiat", "egestas", "class", "aptent", "taciti", "sociosqu", "ad", "litora", "torquent", "per", "conubia", "nostra", "inceptos", "himenaeos", "phasellus", "nibh", "pulvinar", "vitae", "urna", "iaculis", "lobortis", "nisi", "viverra", "arcu", "morbi", "pellentesque", "metus", "commodo", "ut", "facilisis", "felis", "tristique", "ullamcorper", "placerat", "aenean", "convallis", "sollicitudin", "integer", "rutrum", "duis", "est", "etiam", "bibendum", "donec", "pharetra", "vulputate", "maecenas", "mi", "fermentum", "consequat", "suscipit", "aliquam", "habitant", "senectus", "netus", "fames", "quisque", "euismod", "curabitur", "lectus", "elementum", "tempor", "risus", "cras");
+
+			listView.setAdapter(new RecyclerView.Adapter() {
 				@Override
-				public void onItemClick ( AdapterView<?> adapterView, View view, int i, long l ) {
-					Toast.makeText(getActivity(), "Toggling header two", Toast.LENGTH_SHORT).show();
-					if (twoHeadersHidden) {
-						quickReturn.showPermanentlyHiddenQuickReturnHeader(quickHeaderTwo, true);
-					} else {
-						quickReturn.permanentlyHideQuickReturnHeader(quickHeaderTwo, true);
-					}
+				public RecyclerView.ViewHolder onCreateViewHolder ( ViewGroup parent, int viewType ) {
+					return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false));
+				}
 
-					twoHeadersHidden = !twoHeadersHidden;
+				@Override
+				public void onBindViewHolder ( RecyclerView.ViewHolder holder, int position ) {
+					((ViewHolder) holder).getLabel().setText(strings.get(position));
+				}
+
+				@Override
+				public int getItemCount () {
+					return strings.size();
 				}
 			});
 
@@ -87,18 +113,6 @@ public class MainActivity extends ActionBarActivity {
 
 			quickReturn.setObservedView(listView);
 			quickReturn.setOffsetView(offsetView);
-			quickReturn.setOnScrollListener(new AbsListView.OnScrollListener() {
-				@Override
-				public void onScrollStateChanged ( AbsListView listView, int i ) {
-					if (i == SCROLL_STATE_IDLE) {
-						Toast.makeText(getActivity(), "Scrolling finished", Toast.LENGTH_SHORT).show();
-					}
-				}
-
-				@Override
-				public void onScroll ( AbsListView listView, int i, int i2, int i3 ) {
-				}
-			});
 
 			quickReturn.attachHeaderView(fixedHeader, false, false, false);
 			quickReturn.attachHeaderView(quickHeaderTwo, false, false, true);
