@@ -967,17 +967,21 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected void recalculateQuickReturnViewHeights () {
 		headerViewHeights.clear();
 		for (View view : headerViews) {
+			LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+
 			int previousVisibility = view.getVisibility();
 			view.setVisibility(VISIBLE);
-			headerViewHeights.add(view.getMeasuredHeight());
+			headerViewHeights.add(view.getMeasuredHeight() + layoutParams.topMargin + layoutParams.bottomMargin);
 			view.setVisibility(previousVisibility);
 		}
 
 		footerViewHeights.clear();
 		for (View view : footerViews) {
+			LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+
 			int previousVisibility = view.getVisibility();
 			view.setVisibility(VISIBLE);
-			footerViewHeights.add(view.getMeasuredHeight());
+			footerViewHeights.add(view.getMeasuredHeight() + layoutParams.topMargin + layoutParams.bottomMargin);
 			view.setVisibility(previousVisibility);
 		}
 	}

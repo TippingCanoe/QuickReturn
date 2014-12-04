@@ -61,6 +61,7 @@
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/quickReturnHeaderTwo"
 			android:layout_centerHorizontal="true"
+			android:layout_margin="10dp"
 			android:alpha="0.8"
 			android:background="@android:drawable/toast_frame"
 			android:text="QuickReturn"
