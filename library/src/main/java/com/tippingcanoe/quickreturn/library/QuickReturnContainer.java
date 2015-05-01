@@ -171,6 +171,8 @@ public class QuickReturnContainer extends RelativeLayout {
 				handleScrollChanged(y, oldY);
 			}
 		});
+
+		observedView = recyclerView;
 	}
 
 	/**
