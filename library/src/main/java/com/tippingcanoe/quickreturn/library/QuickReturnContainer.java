@@ -51,6 +51,7 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected int idleRevealDelay = 800;
 	protected int minDifferenceBeforeHide = 300;
 	protected int minDifferenceBeforeShow = 100;
+	protected int headerOverlap = 0;
 
 	public QuickReturnContainer ( Context context ) {
 		super(context);
@@ -950,6 +951,15 @@ public class QuickReturnContainer extends RelativeLayout {
 		}
 	}
 
+	/**
+	 * Set the distance, in pixels, that the header should be allowed to overlap the content.
+	 *
+	 * @param headerOverlap
+	 */
+	public void setHeaderOverlap ( int headerOverlap ) {
+		this.headerOverlap = headerOverlap;
+	}
+
 	@Override
 	protected void onLayout ( boolean changed, int l, int t, int r, int b ) {
 		if (changed) {
@@ -997,9 +1007,9 @@ public class QuickReturnContainer extends RelativeLayout {
 		}
 
 		if (offsetView != null) {
-			offsetView.setMinimumHeight(runningHeaderHeightSum);
+			offsetView.setMinimumHeight(runningHeaderHeightSum - headerOverlap);
 			if (onMarginRecalculatedListener != null) {
-				onMarginRecalculatedListener.onMarginRecalculated(runningHeaderHeightSum);
+				onMarginRecalculatedListener.onMarginRecalculated(runningHeaderHeightSum - headerOverlap);
 			}
 		}
 	}
