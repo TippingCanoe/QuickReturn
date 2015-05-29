@@ -1007,9 +1007,10 @@ public class QuickReturnContainer extends RelativeLayout {
 		}
 
 		if (offsetView != null) {
-			offsetView.setMinimumHeight(runningHeaderHeightSum - headerOverlap);
+			int offsetTotal = Math.max(0, runningHeaderHeightSum - headerOverlap);
+			offsetView.setMinimumHeight(offsetTotal);
 			if (onMarginRecalculatedListener != null) {
-				onMarginRecalculatedListener.onMarginRecalculated(runningHeaderHeightSum - headerOverlap);
+				onMarginRecalculatedListener.onMarginRecalculated(offsetTotal);
 			}
 		}
 	}
