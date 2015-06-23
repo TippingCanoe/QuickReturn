@@ -8,7 +8,7 @@ disappear and reappear as the user scrolls through the associated content.
 
 A demo application included with this repository shows an example of this functionality;
 
-![demonstration](https://raw2.github.com/TippingCanoe/QuickReturn/master/demo.gif)
+![demonstration](https://raw.githubusercontent.com/TippingCanoe/QuickReturn/master/demo.gif)
 
 ## Installing
 
@@ -27,7 +27,7 @@ A demo application included with this repository shows an example of this functi
 
 	``` groovy
 	dependencies {
-		compile 'com.tippingcanoe.quickreturn:library:1.0.6'
+		compile 'com.tippingcanoe.quickreturn:library:1.0.8'
 	}
 	```
 
@@ -91,13 +91,13 @@ as necessary. Once you're done, you'll need to tell the `QuickReturnContainer` a
 quickReturn.setOffsetView(offsetView);
 ```
 
-And tell it which `AbsListView` or `ObservableScrollView` to observe for scroll events;
+And tell it which `AbsListView`, `RecyclerView` or `ObservableScrollView` to observe for scroll events;
 
 ``` java
 quickReturn.setObservedView(listView);
 ```
 
-This action will consume the `setOnScrollListener` for an `AbsListView`. If you require listening for these
+This action will consume the `setOnScrollListener` for an `AbsListView` or `RecyclerView`. If you require listening for these
 same callbacks, a passthrough is provided on the `QuickReturnContainer`;
 
 ``` java
