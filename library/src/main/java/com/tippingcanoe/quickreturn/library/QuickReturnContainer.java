@@ -52,6 +52,7 @@ public class QuickReturnContainer extends RelativeLayout {
 	protected int minDifferenceBeforeHide = 300;
 	protected int minDifferenceBeforeShow = 100;
 	protected int headerOverlap = 0;
+	protected boolean enableQuickReturn = true;
 
 	public QuickReturnContainer ( Context context ) {
 		super(context);
@@ -63,6 +64,23 @@ public class QuickReturnContainer extends RelativeLayout {
 
 	public QuickReturnContainer ( Context context, AttributeSet attrs, int defStyle ) {
 		super(context, attrs, defStyle);
+	}
+
+	/**
+	 * Globally enable or disable the quick return feature.
+	 *
+	 * Default is true.
+	 *
+	 * @param enableQuickReturn
+	 */
+	public void setEnableQuickReturn(boolean enableQuickReturn) {
+		if ( this.enableQuickReturn != enableQuickReturn ) {
+			if ( !enableQuickReturn ) {
+				showHiddenQuickReturns(true);
+			}
+		}
+
+		this.enableQuickReturn = enableQuickReturn;
 	}
 
 	/**
@@ -1169,7 +1187,7 @@ public class QuickReturnContainer extends RelativeLayout {
 	}
 
 	protected void handleScrollStateChanged ( int i ) {
-		if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+		if (enableQuickReturn && i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
 			if (revealListenerType == RevealListenerType.SCROLL) {
 				if (snapToIntent) {
 					snapQuickReturnsToIntent(true);
@@ -1196,7 +1214,7 @@ public class QuickReturnContainer extends RelativeLayout {
 	}
 
 	protected void handleScrollChanged ( int y, int oldY ) {
-		if (scrollTallySignificantEnough(y, oldY)) {
+		if (enableQuickReturn && scrollTallySignificantEnough(y, oldY)) {
 			if (revealOnIdle && idleRunnable != null) {
 				removeCallbacks(idleRunnable);
 			}
