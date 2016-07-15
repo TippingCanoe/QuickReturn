@@ -3,7 +3,6 @@ package com.tippingcanoe.quickreturn.library;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.RelativeLayout;
@@ -38,7 +37,7 @@ public class QuickReturnContainer extends RelativeLayout {
 
 	protected AnimationState animationState = AnimationState.SHOWN;
 
-	protected boolean lastActionWasScrollDown = true;
+	protected int lastSignificantScrollDirection = 0;
 	protected int runningScrollTally = 0;
 	protected Runnable idleRunnable;
 
@@ -1116,9 +1115,8 @@ public class QuickReturnContainer extends RelativeLayout {
 
 			runningScrollTally += diff;
 
-			Log.v("Tally", "-- " + runningScrollTally);
 			if (runningScrollTally >= minDifferenceBeforeShow) {
-				Log.v("Tally", "Enough, showing");
+				lastSignificantScrollDirection = 1;
 				return true;
 			}
 		} else if (diff < 0) {
@@ -1129,9 +1127,8 @@ public class QuickReturnContainer extends RelativeLayout {
 
 			runningScrollTally += diff;
 
-			Log.v("Tally", "-- " + runningScrollTally);
 			if (Math.abs(runningScrollTally) >= minDifferenceBeforeHide) {
-				Log.v("Tally", "Enough, hiding");
+				lastSignificantScrollDirection = -1;
 				return true;
 			}
 		} else {
@@ -1142,9 +1139,9 @@ public class QuickReturnContainer extends RelativeLayout {
 	}
 
 	protected void snapQuickReturnsToIntent ( boolean animated ) {
-		if (lastActionWasScrollDown) {
+		if (lastSignificantScrollDirection == -1) {
 			hideShownQuickReturns(animated);
-		} else {
+		} else if ( lastSignificantScrollDirection == 1 ) {
 			showHiddenQuickReturns(animated);
 		}
 	}
@@ -1203,6 +1200,8 @@ public class QuickReturnContainer extends RelativeLayout {
 				}
 			}
 
+			lastSignificantScrollDirection = 0;
+
 			if (revealOnIdle) {
 				if (idleRunnable != null) {
 					removeCallbacks(idleRunnable);
@@ -1225,8 +1224,6 @@ public class QuickReturnContainer extends RelativeLayout {
 			if (revealOnIdle && idleRunnable != null) {
 				removeCallbacks(idleRunnable);
 			}
-
-			lastActionWasScrollDown = y >= oldY;
 
 			if (revealListenerType == RevealListenerType.SCROLL) {
 				setQuickReturnViewTranslations(y, oldY);
