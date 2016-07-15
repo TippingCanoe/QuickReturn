@@ -122,6 +122,7 @@ public class MainActivity extends ActionBarActivity {
 			quickReturn.attachFooterView(quickFooterTwo, true, true, false);
 			quickReturn.attachFooterView(quickFooter, true, true, false);
 
+
 			CheckBox onScrollCheck = (CheckBox) rootView.findViewById(R.id.onScrollCheckbox);
 			onScrollCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 				@Override
@@ -142,7 +143,7 @@ public class MainActivity extends ActionBarActivity {
 			snapCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 				@Override
 				public void onCheckedChanged ( CompoundButton compoundButton, boolean b ) {
-					quickReturn.setSnapToMidpoint(b);
+					quickReturn.setSnapToIntent(b);
 				}
 			});
 

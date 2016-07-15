@@ -3,6 +3,7 @@ package com.tippingcanoe.quickreturn.library;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.RelativeLayout;
@@ -1115,7 +1116,9 @@ public class QuickReturnContainer extends RelativeLayout {
 
 			runningScrollTally += diff;
 
+			Log.v("Tally", "-- " + runningScrollTally);
 			if (runningScrollTally >= minDifferenceBeforeShow) {
+				Log.v("Tally", "Enough, showing");
 				return true;
 			}
 		} else if (diff < 0) {
@@ -1126,7 +1129,9 @@ public class QuickReturnContainer extends RelativeLayout {
 
 			runningScrollTally += diff;
 
+			Log.v("Tally", "-- " + runningScrollTally);
 			if (Math.abs(runningScrollTally) >= minDifferenceBeforeHide) {
+				Log.v("Tally", "Enough, hiding");
 				return true;
 			}
 		} else {
@@ -1188,6 +1193,8 @@ public class QuickReturnContainer extends RelativeLayout {
 
 	protected void handleScrollStateChanged ( int i ) {
 		if (enableQuickReturn && i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+			runningScrollTally = 0;
+
 			if (revealListenerType == RevealListenerType.SCROLL) {
 				if (snapToIntent) {
 					snapQuickReturnsToIntent(true);
